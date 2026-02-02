@@ -1,0 +1,9 @@
+type Query {
+    student(id: ID): Student
+}
+type Student {
+    id: ID
+    name: String
+    age: Int
+    email: String
+}
