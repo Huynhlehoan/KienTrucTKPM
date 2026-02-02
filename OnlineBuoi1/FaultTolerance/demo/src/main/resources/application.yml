@@ -1,0 +1,44 @@
+server:
+  port: 8080 # Service A chạy cổng 8080
+
+resilience4j:
+  # --- 1. Cấu hình RETRY (Thử lại) ---
+  retry:
+    instances:
+      backendB:
+        maxAttempts: 3             # Thử tối đa 3 lần
+        waitDuration: 5s           # Chờ 5 giây giữa các lần thử
+        ignoreExceptions:
+          - io.github.resilience4j.bulkhead.BulkheadFullException
+
+  # --- 2. Cấu hình CIRCUIT BREAKER (Cầu dao) ---
+  circuitbreaker:
+    instances:
+      backendB:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+  # --- 3. Cấu hình RATE LIMITER (Giới hạn tốc độ) ---
+  ratelimiter:
+    instances:
+      backendB:
+        limitForPeriod: 1      # Chỉ cho phép 1 request...
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0s
+
+  # --- 4. Cấu hình BULKHEAD (Vách ngăn) ---
+
+  bulkhead:
+    instances:
+      backendB:
+        maxConcurrentCalls: 2
+        maxWaitDuration: 0ms   # Reject ngay
+
+  thread-pool-bulkhead:
+    instances:
+      backendB:
+        maxThreadPoolSize: 2      # Chỉ có 2 luồng xử lý (tương đương 2 ghế)
+        coreThreadPoolSize: 2
+        queueCapacity: 0

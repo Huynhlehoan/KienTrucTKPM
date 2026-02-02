@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Test Fault Tolerance</title>
+    <style>
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 500px; }
+        h2 { color: #333; margin-bottom: 30px; }
+
+        button { background: #007bff; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 8px; cursor: pointer; transition: 0.3s; width: 100%; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* Vòng tròn xoay xoay */
+        .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #007bff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #status-box { margin-top: 20px; padding: 15px; border-radius: 8px; background: #e9ecef; min-height: 60px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .timer { font-size: 14px; color: #666; margin-top: 5px; }
+        .error-text { color: #dc3545; font-weight: bold; }
+        .success-text { color: #28a745; font-weight: bold; }
+
+        /* --- PHẦN BULKHEAD CŨ CỦA MÀY --- */
+        .btn-bulkhead { background: #6610f2; margin-top: 10px; }
+        .btn-bulkhead:hover { background: #520dc2; }
+
+        #bulkhead-logs {
+            display: none;
+            margin-top: 15px;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background: #fafafa;
+            font-size: 13px;
+        }
+        .log-item { padding: 4px 0; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Demo Resilience4j</h2>
+
+    <button id="btnCall" onclick="goiApi()">GỌI API (Service A -> Service B)</button>
+
+    <button id="btnBulkhead" class="btn-bulkhead" onclick="testBulkhead()">⚡ TEST BULKHEAD (15 Req)</button>
+
+    <div class="spinner" id="loading"></div>
+
+    <div id="status-box">
+        <span id="message">Sẵn sàng...</span>
+        <span class="timer" id="timer"></span>
+    </div>
+
+    <div id="bulkhead-logs"></div>
+</div>
+
+<script>
+    // --- HÀM 1: GỌI API (Đã sửa để bắt cả lỗi Rate Limit) ---
+    async function goiApi() {
+        const btn = document.getElementById('btnCall');
+        const spinner = document.getElementById('loading');
+        const msg = document.getElementById('message');
+        const timerDisplay = document.getElementById('timer');
+
+        // Reset
+        btn.disabled = true;
+        spinner.style.display = 'block';
+        msg.innerHTML = "Đang gọi Service A... <br> (Nếu Service B chết, Spring Boot sẽ đợi Retry)";
+        msg.className = "";
+
+        let startTime = Date.now();
+        let timerInterval = setInterval(() => {
+            let seconds = ((Date.now() - startTime) / 1000).toFixed(1);
+            timerDisplay.innerText = `Thời gian chờ: ${seconds}s`;
+
+            if (seconds > 2) {
+                msg.innerHTML = "Service B chậm/die. <br> Spring Boot đang <b>RETRY</b>...";
+                msg.style.color = "#d68100";
+            }
+        }, 100);
+
+        try {
+            // Sửa fetch để lấy status code
+            const response = await fetch('/test');
+            const text = await response.text();
+
+            // Check lỗi: Status khác 200 HOẶC có chữ FALLBACK
+            if (!response.ok || text.includes("FALLBACK")) {
+                msg.innerHTML = "<b>KẾT QUẢ:</b> " + text;
+                msg.className = "error-text";
+            } else {
+                msg.innerHTML = "<b>THÀNH CÔNG:</b> " + text;
+                msg.className = "success-text";
+            }
+
+        } catch (err) {
+            msg.innerText = "Lỗi kết nối tới Spring Boot!";
+            msg.className = "error-text";
+        } finally {
+            clearInterval(timerInterval);
+            spinner.style.display = 'none';
+            btn.disabled = false;
+        }
+    }
+
+    // --- HÀM 2: BULKHEAD (LOGIC MỚI - GIAO DIỆN CŨ) ---
+    async function testBulkhead() {
+        const logDiv = document.getElementById('bulkhead-logs');
+        logDiv.style.display = 'block';
+        logDiv.innerHTML = "<b>⏳ Đang bắn 15 request cùng lúc...</b><hr>";
+
+        for (let i = 1; i <= 15; i++) {
+            // KHÔNG DÙNG AWAIT để bắn song song
+            fetch('/test')
+                .then(async (res) => {
+                    let text = await res.text();
+
+                    // --- LOGIC BẮT LỖI QUAN TRỌNG ---
+                    // Nếu Status = 500 (Bulkhead chặn) HOẶC có chữ FALLBACK
+                    let isFail = !res.ok || text.includes("FALLBACK") || text.includes("full");
+
+                    let color = isFail ? "red" : "green";
+                    let icon = isFail ? "BỊ CHẶN" : "THÀNH CÔNG";
+
+                    // Render đúng class log-item cũ của mày
+                    logDiv.innerHTML += `<div class="log-item" style="color:${color}">
+                        <b>Req #${i}:</b> ${icon} <br> <small>${text.substring(0, 50)}...</small>
+                    </div>`;
+                })
+                .catch(err => {
+                    logDiv.innerHTML += `<div class="log-item" style="color:red">
+                        <b>Req #${i}:</b> LỖI MẠNG
+                    </div>`;
+                });
+        }
+    }
+</script>
+</body>
+</html>
