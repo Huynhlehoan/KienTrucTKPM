@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  # 1. Khối Database
+  db:
+    build: ./database
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: secretpassword
+
+  # 2. Khối Backend
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db 
+  # 3. Khối Frontend
+  frontend:
+    build: ./frontend
+    ports:
+      - "8082:80"
+    depends_on:
+      - backend
