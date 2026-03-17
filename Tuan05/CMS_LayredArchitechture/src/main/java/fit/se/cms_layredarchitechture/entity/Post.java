@@ -12,6 +12,10 @@ public class Post {
     private Long id;
     private String title;
     private String content;
+    private String author;
+
+    public String getAuthor() { return author; }
+    public void setAuthor(String author) { this.author = author; }
 
     // Getters và Setters
     public Long getId() { return id; }
