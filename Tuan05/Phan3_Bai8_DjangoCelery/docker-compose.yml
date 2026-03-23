@@ -1,0 +1,28 @@
+services:
+  # 1. Cái giỏ chứa Task
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  # 2. Web App (Giao diện chính)
+  web:
+    build: . # Code Django của m
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+
+  # 3. Thằng công nhân chạy ngầm (Celery)
+  # Lưu ý: Nó dùng chung 1 source code (build: .) với thằng web
+  celery:
+    build: .
+    command: celery -A myproject worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - web

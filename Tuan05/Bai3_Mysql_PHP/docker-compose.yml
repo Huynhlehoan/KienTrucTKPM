@@ -1,0 +1,17 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8081:80" # Map ra cổng 8081 trên máy
+    environment:
+      PMA_HOST: db # Khai báo cho PHPMyAdmin biết cần kết nối tới service tên là 'db'
+    depends_on:
+      - db

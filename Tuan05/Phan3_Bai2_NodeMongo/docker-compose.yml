@@ -1,0 +1,24 @@
+services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      # Dùng lệnh ping để kiểm tra xem Mongo đã nhận request chưa
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s       # Cứ 5 giây kiểm tra 1 lần
+      timeout: 3s        # Đợi 3 giây không thấy trả lời là tính tịt
+      retries: 5         # Thử tối đa 5 lần
+
+  app:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    depends_on:
+      mongo:
+        condition: service_healthy # Lệnh vàng: Chờ đến khi Mongo báo 'healthy' mới chạy
+
+volumes:
+  mongo_data:

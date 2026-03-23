@@ -1,0 +1,10 @@
+services:
+  redis_gioi_han:
+    image: redis:latest
+    ports:
+      - "6378:6379"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'     # Chỉ cho xài tối đa nửa nhân CPU
+          memory: 256M    # Khóa mõm ở 256MB RAM

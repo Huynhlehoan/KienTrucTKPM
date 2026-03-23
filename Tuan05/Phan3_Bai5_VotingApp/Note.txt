@@ -1,0 +1,20 @@
+Vote App (Python): Giao diện web để người dùng vào bấm bình chọn (Chó hoặc Mèo).
+
+Redis:  này nhận kết quả bình chọn siêu tốc, giữ tạm ở đó.
+
+Worker (Java):  chạy ngầm không có giao diện. Nó liên tục nhìn vào Redis, hễ có người vừa vote là nó hốt cái vote đó...
+
+Postgres: ...và nhét vào database lưu trữ vĩnh viễn.
+
+Result App (Node.js): Giao diện web khác dành cho Admin, đọc data từ Postgres để hiển thị biểu đồ kết quả theo thời gian thực.
+
+front-tier: Là mạng lưới ngoài mặt tiền, để 2 thằng giao diện web (vote và result) tiếp khách.
+
+back-tier: Là mạng nội bộ phía sau.  Redis, Worker và Postgres chỉ nằm ở back-tier. Khách ở ngoài internet tuyệt đối không thể ping hay kết nối trực tiếp vào cục Database được
+
+Mở terminal gõ: docker compose up -d 
+Mở sẵn 2 tab trình duyệt:
+
+Tab 1: Vào http://localhost:5000 (Đây là màn hình vote Chó hoặc Mèo).
+
+Tab 2: Vào http://localhost:5001 (Đây là màn hình kết quả Admin).

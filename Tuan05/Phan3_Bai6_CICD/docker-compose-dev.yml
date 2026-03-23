@@ -1,0 +1,14 @@
+services:
+  app:
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - .:/app # Ánh xạ code trực tiếp từ máy vào container
+    command: sh -c "npm install && npm run dev" # Chạy mode dev
+
+  tests:
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: sh -c "npm install && npm test" # Chạy tự động Unit Test

@@ -1,0 +1,54 @@
+services:
+  # 1. Ứng dụng Bỏ phiếu (Frontend cho user)
+  vote:
+    image: dockersamples/examplevotingapp_vote
+    ports:
+      - "5000:80"
+    networks:
+      - front-tier
+      - back-tier
+
+  # 2. Ứng dụng Xem kết quả (Frontend cho admin)
+  result:
+    image: dockersamples/examplevotingapp_result
+    ports:
+      - "5001:80"
+    depends_on:
+      - db
+    networks:
+      - front-tier
+      - back-tier
+
+  # 3. Java (Chạy ngầm kết nối Redis và DB)
+  worker:
+    image: dockersamples/examplevotingapp_worker
+    depends_on:
+      - redis
+      - db
+    networks:
+      - back-tier
+
+  # 4. Cache Redis (Lưu tạm data)
+  redis:
+    image: redis:alpine
+    networks:
+      - back-tier
+
+  # 5. Database chính
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - back-tier
+
+# Đừng quên khai báo volume và network ở dưới cùng
+volumes:
+  db-data:
+
+networks:
+  front-tier:
+  back-tier:

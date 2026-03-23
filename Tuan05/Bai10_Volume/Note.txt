@@ -1,0 +1,26 @@
+Volume (Ổ cứng ảo) trong Docker:
+Đặc điểm của Docker là: Khi gõ: docker compose down, cái container (như MySQL) sẽ bị xóa sạch. Nếu đang có 1000 user trong database đó, xóa là mất hết.
+Volume sinh ra để giải quyết chuyện này: Nó lấy một thư mục chứa data của MySQL lưu ra ngoài ổ cứng thật. Lần sau tạo lại container, nó lại lấy data cũ đắp vào, không bao giờ bị mất dữ liệu.
+
+Bước 1: Tạo data nháp
+
+Đang ở cái dấu mysql>,gõ lệnh để tạo:
+CREATE DATABASE hoc_docker_volume;
+
+Gõ lại SHOW DATABASES; để xác nhận là đã có hoc_docker_volume trong danh sách.
+
+Gõ chữ exit rồi Enter để thoát khỏi MySQL, quay lại terminal bình thường.
+
+Bước 2: Phá sập hệ thống
+Gõ lệnh này để xóa sổ toàn bộ container (giả lập bị sập server):
+docker compose down
+
+Bước 3: 
+
+Bật nó lên lại: docker compose up -d
+
+Chờ khoảng 5 giây rồi chui lại vào trong db: docker compose exec db mysql -u root -prootpassword
+
+Gõ lại: SHOW DATABASES;
+
+Lần này mở ra mà vẫn thấy cái hoc_docker_volume -> thành công

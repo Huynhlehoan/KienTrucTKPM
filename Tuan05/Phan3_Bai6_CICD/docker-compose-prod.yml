@@ -1,0 +1,12 @@
+services:
+  app_prod:
+    build: . # Build chết code thành image luôn
+    ports:
+      - "3000:3000"
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    depends_on:
+      - app_prod

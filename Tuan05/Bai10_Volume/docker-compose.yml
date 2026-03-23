@@ -1,0 +1,15 @@
+services:
+  db:
+    image: mysql:8.0
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydb
+    volumes:
+      # Cú pháp: tên_volume:/đường_dẫn_lưu_data_trong_container
+      - mysql_data:/var/lib/mysql
+
+# Bắt buộc phải khai báo tên volume ở dưới cùng
+volumes:
+  mysql_data:

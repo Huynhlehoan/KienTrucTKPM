@@ -1,0 +1,5 @@
+services:
+  web:
+    build: . # Dấu chấm nghĩa là "tìm Dockerfile ở ngay thư mục hiện tại để build"
+    ports:
+      - "3000:3000"

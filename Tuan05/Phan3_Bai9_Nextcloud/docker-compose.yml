@@ -1,0 +1,38 @@
+services:
+  db:
+    image: mariadb:10.6
+    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
+    restart: always
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_PASSWORD: nextcloud_pass
+      MYSQL_DATABASE: nextcloud_db
+      MYSQL_USER: nextcloud_user
+
+  redis:
+    image: redis:alpine
+    restart: always
+
+  app:
+    image: nextcloud
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+      - redis
+    environment:
+      # Cấu hình để Nextcloud tự động kết nối DB và Cache
+      MYSQL_PASSWORD: nextcloud_pass
+      MYSQL_DATABASE: nextcloud_db
+      MYSQL_USER: nextcloud_user
+      MYSQL_HOST: db
+      REDIS_HOST: redis
+    volumes:
+      - nextcloud_data:/var/www/html
+
+volumes:
+  db_data:
+  nextcloud_data:

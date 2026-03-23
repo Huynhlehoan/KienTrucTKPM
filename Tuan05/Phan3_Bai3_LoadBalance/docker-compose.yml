@@ -1,0 +1,29 @@
+services:
+  # Nhân viên 1
+  flask1:
+    build: ./flask_app
+    networks:
+      - lb_network
+
+  # Nhân viên 2 (Dùng chung 1 bản build code)
+  flask2:
+    build: ./flask_app
+    networks:
+      - lb_network
+
+  # Thằng quản lý
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf # Gắn kịch bản cho Nginx
+    depends_on:
+      - flask1
+      - flask2
+    networks:
+      - lb_network
+
+networks:
+  lb_network:
+    driver: bridge

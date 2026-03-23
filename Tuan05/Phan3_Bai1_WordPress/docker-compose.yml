@@ -1,0 +1,35 @@
+services:
+  # Cục Database (Chạy ngầm)
+  db:
+    image: mysql:5.7
+    volumes:
+      - db_data:/var/lib/mysql # Gắn Volume giữ data
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: wordpress_db
+      MYSQL_USER: wp_user
+      MYSQL_PASSWORD: wp_password
+    networks:
+      - wp_network
+
+  # Giao diện web WordPress
+  wordpress:
+    image: wordpress:latest
+    ports:
+      - "80:80" # Map ra trình duyệt ở port 80
+    environment:
+      # Phải khai báo thông tin y hệt như bên db để nó biết đường chui vào
+      WORDPRESS_DB_HOST: db:3306 
+      WORDPRESS_DB_USER: wp_user
+      WORDPRESS_DB_PASSWORD: wp_password
+      WORDPRESS_DB_NAME: wordpress_db
+    depends_on:
+      - db # Chờ thằng db chạy xong thì web mới được phép chạy
+    networks:
+      - wp_network
+
+volumes:
+  db_data:
+
+networks:
+  wp_network:

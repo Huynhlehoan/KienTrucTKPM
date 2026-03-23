@@ -1,0 +1,17 @@
+services:
+  app1:
+    image: alpine:latest
+    command: sleep infinity # Ép container thức mãi mãi để test
+    networks:
+      - my_secret_net
+
+  app2:
+    image: alpine:latest
+    command: sleep infinity
+    networks:
+      - my_secret_net
+
+# Khai báo mạng nội bộ
+networks:
+  my_secret_net:
+    driver: bridge
