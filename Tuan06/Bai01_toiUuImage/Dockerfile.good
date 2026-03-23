@@ -1,0 +1,17 @@
+# --- STAGE 1: MÔI TRƯỜNG BUILD ---
+FROM node:18 AS builder
+WORKDIR /app
+COPY package.json .
+RUN npm install
+COPY . .
+# Ở bước này nó tải cả NPM về, rất nặng.
+
+# --- STAGE 2: MÔI TRƯỜNG CHẠY ---
+# Dùng bản Alpine siêu nhẹ (chỉ khoảng 5MB hệ điều hành)
+FROM node:18-alpine
+WORKDIR /app
+# CHỈ COPY những gì cần thiết từ cục "builder" sang đây.
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/app.js ./app.js
+
+CMD ["node", "app.js"]
