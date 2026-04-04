@@ -1,5 +1,5 @@
 package fit.se;
-
+// lõi = payment decorator
 public class CreditCardPayment implements Payment{
     @Override
     public void pay(double amount) {

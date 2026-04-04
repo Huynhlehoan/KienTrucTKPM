@@ -9,6 +9,8 @@ public class Product {
         this.taxStrategy = taxStrategy;
     }
 
+
+
     public double getFinalPrice() {
         double tax = taxStrategy.calculate(price);
         return price + tax;

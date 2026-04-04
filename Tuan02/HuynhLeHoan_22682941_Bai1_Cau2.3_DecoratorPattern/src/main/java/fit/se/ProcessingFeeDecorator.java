@@ -1,5 +1,5 @@
 package fit.se;
-
+// cụ thể
 public class ProcessingFeeDecorator extends PaymentDecorator{
     public ProcessingFeeDecorator(Payment payment) {
         super(payment);

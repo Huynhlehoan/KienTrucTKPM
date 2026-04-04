@@ -1,5 +1,5 @@
 package fit.se;
-
+//vỏ
 public abstract class PaymentDecorator implements Payment {
     protected Payment wrappedPayment;
 
