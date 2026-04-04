@@ -1,0 +1,7 @@
+Partitioning (phân mảnh dữ liệu) giúp tối ưu hóa hiệu suất truy vấn và quản lý dữ liệu khi bảng trở nên quá lớn. Có 3 kiểu chia chính:
+
+Horizontal Partitioning (Phân mảnh ngang): Chia dữ liệu theo hàng (row). Các bảng có cấu trúc cột giống hệt nhau, nhưng chứa các bản ghi khác nhau dựa trên một điều kiện (ví dụ: nam ở một bảng, nữ ở một bảng). Đây chính là ví dụ bạn đang muốn làm.
+
+Vertical Partitioning (Phân mảnh dọc): Chia dữ liệu theo cột (column). Tách một bảng có quá nhiều cột thành nhiều bảng. Ví dụ: Bảng User tách các cột cơ bản (id, name) ở lại, còn các cột chứa data nặng (bio, avatar_blob, mô tả chi tiết) đẩy sang bảng User_Profile.
+
+Functional Partitioning (Phân mảnh theo chức năng): Phân chia theo domain/nghiệp vụ. Ví dụ: Hệ thống lớn chia thành Database Order, Database User, Database Product. (HeidiSQL là tool quản trị DB, có thể dễ dàng tạo và quản lý các database/schema độc lập này trên một server duy nhất thông qua HeidiSQL).
