@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-public class CatalogController {
+public class FoodController {
 
     @Autowired private MenuItemRepository menuRepo;
 
